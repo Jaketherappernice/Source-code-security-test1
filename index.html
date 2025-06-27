@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>🛡️ Secure Test Page</title>
+    <style>
+      body {
+        background: black;
+        color: lime;
+        font-family: monospace;
+        text-align: center;
+        padding-top: 20vh;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+    <script>
+      // ✅ Settings
+      const allowedDomains = ["localhost", "127.0.0.1", "secure-test.com"];
+      const aesKey = "ThisIsASecretKey";
+
+      // ✅ Kill if hosted on wrong domain
+      if (!allowedDomains.includes(location.hostname)) {
+        document.documentElement.innerHTML = "";
+        throw new Error("Unauthorized domain");
+      }
+
+      // ✅ Kill if file:// or referrer is missing
+      if (location.protocol === "file:" || document.referrer === "") {
+        document.documentElement.innerHTML = "";
+      }
+
+      // ✅ Kill if DevTools is open
+      setInterval(() => {
+        const before = performance.now();
+        debugger;
+        const after = performance.now();
+        if (after - before > 100) {
+          document.documentElement.innerHTML = "";
+        }
+      }, 1000);
+
+      // ✅ Encrypted payload
+      const encrypted = "U2FsdGVkX19v0EmuZ0+j17CVrMFu6CvLXt+fttzBfiA=";
+
+      // ✅ Decrypt and run only if on correct domain
+      try {
+        const decrypted = CryptoJS.AES.decrypt(encrypted, aesKey).toString(CryptoJS.enc.Utf8);
+        eval(decrypted); // Real code runs here
+      } catch (e) {
+        document.documentElement.innerHTML = "";
+      }
+    </script>
+  </head>
+  <body>
+    <h1>🛡️ Secure Test Page</h1>
+    <p>If you're seeing this, you're authorized.</p>
+  </body>
+</html>
